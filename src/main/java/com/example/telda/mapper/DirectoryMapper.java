@@ -1,9 +1,7 @@
 package com.example.telda.mapper;
 
 import com.example.telda.model.Directory;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -13,8 +11,15 @@ public interface DirectoryMapper {
     @Select("select * from directory")
     List<Directory> findAll();
 
-    @Update("UPDATE directory " +
-            "SET name = #{name}, abbreviation = #{abbreviation} " +
-            "WHERE id = #{id}")
+    @Select("insert into directory (name, abbreviation) " +
+            "values (#{name}, #{abbreviation})")
+    void addNew(Directory directory);
+
+    @Delete("delete from directory where id = #{id}")
+    boolean deleteDirectory(@Param("id") Long id);
+
+    @Update("update directory " +
+            "set name = #{name}, abbreviation = #{abbreviation} " +
+            "where id = #{id}")
     boolean update(Directory directory);
 }

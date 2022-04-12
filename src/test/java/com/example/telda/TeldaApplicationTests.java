@@ -10,7 +10,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,7 +55,7 @@ class TeldaApplicationTests {
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .characterEncoding("UTF-8")
                 .content(jsonForUpdate))
-                .andDo(print()).andExpect(status().isOk())
+                .andDo(print())
                 .andExpect(status().isOk());
 
         this.mockMvc.perform(get("/api/telda/directory/all"))
@@ -74,5 +77,43 @@ class TeldaApplicationTests {
                         .content(jsonForUpdate))
                 .andDo(print())
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testDeleteSuccess() throws Exception {
+        this.mockMvc.perform(delete("/api/telda/directory/delete/1"))
+                .andDo(print()).andExpect(status().isOk());
+
+        this.mockMvc.perform(get("/api/telda/directory/all"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    public void testDeleteFault() throws Exception {
+        this.mockMvc.perform(delete("/api/telda/directory/delete/100"))
+                .andDo(print()).andExpect(status().isNotFound());
+
+        this.mockMvc.perform(get("/api/telda/directory/all"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(4)));
+    }
+
+    @Test
+    public void testAddNew() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+
+        String jsonForUpdate = mapper.writeValueAsString(new Directory(null, "Moscow_new", "msc_new"));
+
+        this.mockMvc.perform(post("/api/telda/directory/new")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .characterEncoding("UTF-8")
+                        .content(jsonForUpdate))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        this.mockMvc.perform(get("/api/telda/directory/all"))
+                .andDo(print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(5)));
     }
 }

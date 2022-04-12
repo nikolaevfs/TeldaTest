@@ -19,15 +19,33 @@ public class DirectoryController {
     private final DirectoryService directoryService;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Directory>> getAllDirectories(){
+    public ResponseEntity<List<Directory>> getAllDirectories() {
         log.info("Try to get all directories");
         return ResponseEntity.ok(directoryService.getAllDirectories());
     }
 
+    @PostMapping("/new")
+    public ResponseEntity<String> addNewDirectory(@RequestBody Directory directory) {
+        log.info("Try to add new directory");
+        directoryService.addDirectory(directory);
+        return ResponseEntity.ok("Directory with name " + directory.getName() + " was added");
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteDirectory(@PathVariable Long id) {
+        log.info("Try to delete directory");
+        if (directoryService.deleteDirectory(id)) {
+            log.info("Directory was deleted");
+            return ResponseEntity.ok("Directory with id " + id + " was deleted");
+        }
+        log.warn("There is no directory with id = " + id);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no directory with id = " + id);
+    }
+
     @PatchMapping("/update")
-    public ResponseEntity<String> updateDirectory(@RequestBody Directory directory){
+    public ResponseEntity<String> updateDirectory(@RequestBody Directory directory) {
         log.info("Try to update directory");
-        if (directoryService.updateDirectory(directory)){
+        if (directoryService.updateDirectory(directory)) {
             log.info("Directory was updated");
             return ResponseEntity.ok("Successfully updated");
         }
